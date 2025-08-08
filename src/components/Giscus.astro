@@ -1,18 +1,18 @@
 ---
-export interface Props { }
+/* No props needed */
 ---
 <section class="mt-12">
   <script src="https://giscus.app/client.js"
-    data-repo="YOUR_GITHUB_USERNAME/YOUR_REPO"
-    data-repo-id="YOUR_REPO_ID"
+    data-repo="prosenjith/prosenjith_blog"
+    data-repo-id="R_kgDOPayvDw"
     data-category="General"
-    data-category-id="YOUR_CATEGORY_ID"
+    data-category-id="DIC_kwDOPayvD84Ct9BS"
     data-mapping="pathname"
     data-strict="0"
     data-reactions-enabled="1"
     data-emit-metadata="0"
     data-input-position="bottom"
-    data-theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+    data-theme="light"   <!-- initial; we'll sync below -->
     data-lang="en"
     crossorigin="anonymous"
     async>
@@ -20,15 +20,33 @@ export interface Props { }
   <noscript>Please enable JavaScript to view comments powered by Giscus.</noscript>
 </section>
 
-<script>
-  const observer = new MutationObserver(() => {
+<script is:inline>
+  // When the page loads or theme changes, keep Giscus in sync with our .dark class
+  function syncGiscusTheme() {
+    const isDark = document.documentElement.classList.contains('dark');
     const iframe = document.querySelector('iframe.giscus-frame');
     if (!iframe) return;
     iframe.contentWindow?.postMessage({
-      giscus: { setConfig: {
-        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-      }}
+      giscus: { setConfig: { theme: isDark ? 'dark' : 'light' } }
     }, 'https://giscus.app');
+  }
+
+  // Try once when the iframe appears
+  const obs = new MutationObserver(() => {
+    const iframe = document.querySelector('iframe.giscus-frame');
+    if (iframe) {
+      syncGiscusTheme();
+      obs.disconnect();
+    }
   });
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  obs.observe(document.body, { childList: true, subtree: true });
+
+  // Also resync whenever we toggle theme (our toggle flips the 'dark' class)
+  const classObs = new MutationObserver(syncGiscusTheme);
+  classObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  // And on page visibility change (for SPA/nav)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) syncGiscusTheme();
+  });
 </script>
