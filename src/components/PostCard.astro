@@ -1,0 +1,19 @@
+---
+export interface Props {
+  href: string;
+  title: string;
+  description?: string;
+  date?: string;
+  tags?: string[];
+}
+const { href, title, description, date, tags = [] } = Astro.props as Props;
+---
+<article class="space-y-1">
+  <h2 class="text-xl font-semibold"><a href={href} class="hover:underline">{title}</a></h2>
+  {description && <p class="opacity-80">{description}</p>}
+  <div class="text-xs opacity-70 flex items-center gap-2">
+    {date}
+    {tags.length > 0 && <span>•</span>}
+    {tags.map(t => <a href={`/tags/${t}`} class="px-2 py-0.5 border rounded">{t}</a>)}
+  </div>
+</article>

@@ -1,0 +1,45 @@
+---
+import "../styles/global.css";
+import Footer from "../components/Footer.astro";
+  import Header from "../components/Header.astro";
+import Giscus from "../components/Giscus.astro";
+interface Frontmatter {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags: string[];
+}
+const { title, description, pubDate, updatedDate, tags } = Astro.props as Frontmatter;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | Shuvo’s Notes</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-yF2FqZkVQvGv8sU6sYxE/0H2Jf9W7G4m1nQqR2If1mQxBvQxw9S9WwZ3/NjZC0ay" crossorigin="anonymous">
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="og:image" content={`/og/${Astro.url.pathname.split('/').filter(Boolean).pop()}.png`} />
+  <script is:inline>!function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.classList.toggle('dark',t==='dark')}else{document.documentElement.classList.toggle('dark',window.matchMedia('(prefers-color-scheme: dark)').matches)}}catch(e){}}();</script>
+    </head>
+  <body class="max-w-3xl mx-auto px-4">
+      <Header />
+    <a href="/" class="inline-block mt-6 text-sm hover:underline">← Home</a>
+    <main class="prose prose-neutral dark:prose-invert max-w-none mt-6">
+      <h1>{title}</h1>
+      <p class="!mt-0 text-sm opacity-70">
+        {new Date(pubDate).toDateString()}
+        {updatedDate && ` • Updated ${new Date(updatedDate).toDateString()}`}
+      </p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        {tags?.map(t => <a href={`/tags/${t}`} class="text-xs px-2 py-1 border rounded">{t}</a>)}
+      </div>
+      <slot />
+      <Giscus />
+    </main>
+    <Footer />
+  </body>
+</html>

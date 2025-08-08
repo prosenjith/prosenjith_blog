@@ -1,0 +1,37 @@
+---
+import "../styles/global.css";
+import { getCollection } from "astro:content";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import PostCard from "../components/PostCard.astro";
+
+const posts = (await getCollection("posts"))
+  .filter(p => !p.data.draft)
+  .sort((a,b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shuvo’s Notes</title>
+    <meta name="description" content="Software Engineering • Android • Programming • Physics" />
+    <meta property="og:title" content="Shuvo’s Notes" />
+    <meta property="og:description" content="Software Engineering • Android • Programming • Physics" />
+  <script is:inline>!function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.classList.toggle('dark',t==='dark')}else{document.documentElement.classList.toggle('dark',window.matchMedia('(prefers-color-scheme: dark)').matches)}}catch(e){}}();</script>
+    </head>
+  <body class="max-w-3xl mx-auto px-4">
+    <Header />
+    <section class="space-y-8">
+      {posts.map(({ slug, data }) => (
+        <PostCard
+          href={`/posts/${slug}/`}
+          title={data.title}
+          description={data.description}
+          date={data.pubDate.toDateString()}
+          tags={data.tags}
+        />
+      ))}
+    </section>
+    <Footer />
+  </body>
+</html>

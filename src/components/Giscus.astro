@@ -1,0 +1,34 @@
+---
+export interface Props { }
+---
+<section class="mt-12">
+  <script src="https://giscus.app/client.js"
+    data-repo="YOUR_GITHUB_USERNAME/YOUR_REPO"
+    data-repo-id="YOUR_REPO_ID"
+    data-category="General"
+    data-category-id="YOUR_CATEGORY_ID"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="bottom"
+    data-theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+    data-lang="en"
+    crossorigin="anonymous"
+    async>
+  </script>
+  <noscript>Please enable JavaScript to view comments powered by Giscus.</noscript>
+</section>
+
+<script>
+  const observer = new MutationObserver(() => {
+    const iframe = document.querySelector('iframe.giscus-frame');
+    if (!iframe) return;
+    iframe.contentWindow?.postMessage({
+      giscus: { setConfig: {
+        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+      }}
+    }, 'https://giscus.app');
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+</script>

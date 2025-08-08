@@ -1,0 +1,12 @@
+---
+import DarkModeToggle from "./DarkModeToggle.astro";
+const title = "Shuvo’s Notes";
+const subtitle = "Software Engineering • Android • Programming • Physics";
+---
+<header class="py-10 flex items-center justify-between">
+  <div>
+    <a href="/" class="text-2xl font-bold hover:opacity-80">{title}</a>
+    <p class="opacity-70">{subtitle}</p>
+  </div>
+  <DarkModeToggle />
+</header>
