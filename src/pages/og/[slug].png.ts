@@ -2,10 +2,15 @@ import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 import { getCollection } from "astro:content";
 
-export async function GET({ params }) {
-  const slug = params.slug;
+export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  const post = posts.find(p => p.slug === slug);
+  return posts.map((p) => ({ params: { slug: p.slug } }));
+}
+
+export async function GET({ params }) {
+  const posts = await getCollection("posts");
+  const post = posts.find((p) => p.slug === params.slug);
+
   const title = post?.data.title ?? "Shuvo’s Notes";
   const desc  = post?.data.description ?? "Software Engineering • Android • Programming • Physics";
 
@@ -13,11 +18,20 @@ export async function GET({ params }) {
     {
       type: "div",
       props: {
-        style: { display: "flex", width: "1200px", height: "630px", padding: "60px", background: "#0b0b0b", color: "#ffffff", flexDirection: "column", justifyContent: "center" },
+        style: {
+          display: "flex",
+          width: "1200px",
+          height: "630px",
+          padding: "60px",
+          background: "#0b0b0b",
+          color: "#ffffff",
+          flexDirection: "column",
+          justifyContent: "center"
+        },
         children: [
           { type: "div", props: { style: { fontSize: "56px", fontWeight: 800, lineHeight: 1.1 }, children: title } },
           { type: "div", props: { style: { marginTop: "24px", fontSize: "28px", opacity: 0.85 }, children: desc } },
-          { type: "div", props: { style: { position: "absolute", right: "60px", bottom: "40px", fontSize: "24px", opacity: 0.8 }, children: "shuvo.dev" } }
+          { type: "div", props: { style: { position: "absolute", right: "60px", bottom: "40px", fontSize: "24px", opacity: 0.8 }, children: "prosenjith.com" } }
         ]
       }
     },
