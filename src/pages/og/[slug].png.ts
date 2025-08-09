@@ -19,7 +19,7 @@ export async function GET({ params }) {
 
   // Load a bundled font (no external fetch during build)
   const interRegular = await readFile(
-    new URL("../../assets/fonts/Inter-Regular.ttf", import.meta.url)
+    new URL("../../../src/assets/fonts/Inter-Regular.ttf", import.meta.url)
   );
 
   const svg = await satori(
