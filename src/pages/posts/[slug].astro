@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+
+// Build a static page for every post in the collection
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+// When your MD/MDX frontmatter specifies `layout: ../../layouts/PostLayout.astro`,
+// rendering <Content /> will use that layout automatically.
+const { Content } = await post.render();
+---
+
+<Content />
