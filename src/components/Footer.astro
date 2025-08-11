@@ -1,3 +1,7 @@
-<footer class="py-16 text-sm opacity-60">
-  <p>© {new Date().getFullYear()} Shuvo. Built with Astro & Tailwind.</p>
+---
+import { SITE } from "../site";
+const year = new Date().getFullYear();
+---
+<footer class="mt-10 py-8 opacity-70 text-sm">
+  © {year} {SITE.title}. Built with Astro & Tailwind.
 </footer>

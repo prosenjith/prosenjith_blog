@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { SITE } from "../site";
 import { getCollection } from "astro:content";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -13,25 +14,27 @@ const posts = (await getCollection("posts"))
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Shuvo’s Notes</title>
-    <meta name="description" content="Software Engineering • Android • Programming • Physics" />
-    <meta property="og:title" content="Shuvo’s Notes" />
-    <meta property="og:description" content="Software Engineering • Android • Programming • Physics" />
-  <script is:inline>!function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.classList.toggle('dark',t==='dark')}else{document.documentElement.classList.toggle('dark',window.matchMedia('(prefers-color-scheme: dark)').matches)}}catch(e){}}();</script>
-    </head>
+    <title>{SITE.title}</title>
+    <meta name="description" content={SITE.description} />
+    <meta property="og:title" content={SITE.title} />
+    <meta property="og:description" content={SITE.description} />
+    <script is:inline>!function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches)}catch(_){}}();</script>
+  </head>
   <body class="max-w-3xl mx-auto px-4">
     <Header />
-    <section class="space-y-8">
-      {posts.map(({ slug, data }) => (
-        <PostCard
-          href={`/posts/${slug}/`}
-          title={data.title}
-          description={data.description}
-          date={data.pubDate.toDateString()}
-          tags={data.tags}
-        />
-      ))}
-    </section>
+    <main class="pt-8 md:pt-10 lg:pt-12">
+      <section class="space-y-8">
+        {posts.map(({ slug, data }) => (
+          <PostCard
+            href={`/posts/${slug}/`}
+            title={data.title}
+            description={data.description}
+            date={data.pubDate.toDateString()}
+            tags={data.tags}
+          />
+        ))}
+      </section>
+    </main>
     <Footer />
   </body>
 </html>

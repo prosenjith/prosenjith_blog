@@ -1,18 +1,11 @@
 ---
+import { SITE, NAV } from "../site";
 import DarkModeToggle from "./DarkModeToggle.astro";
 
 const path = Astro.url.pathname.replace(/\/+$/, "");
 const isActive = (href: string) =>
   href === "/" ? path === "" || path === "/" : path.startsWith(href);
-
-const nav = [
-  { label: "Build",   href: "/categories/code-and-craft" },
-  { label: "Think",   href: "/categories/mind-and-machine" },
-  { label: "Explore", href: "/categories/universe-and-beyond" },
-  { label: "Live",    href: "/categories/life-in-motion" },
-];
 ---
-
 <header
   class="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/60
          dark:supports-[backdrop-filter]:bg-black/40 bg-white/85 dark:bg-black/65
@@ -22,19 +15,16 @@ const nav = [
     <div class="h-14 flex items-center justify-between gap-3">
       <!-- Brand -->
       <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-[1.05rem] hover:opacity-90">
-  <!-- Feather Pen -->
-  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-    <path d="M12 20h9" />
-    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-  </svg>
-  <span class="brand-text">Prosenjith’s Notes</span>
-</a>
-
-
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        </svg>
+        <span class="brand-text">{SITE.title}</span>
+      </a>
 
       <!-- Desktop nav -->
       <nav class="hidden md:flex items-center gap-1 text-[0.92rem] font-medium">
-        {nav.map((item) => {
+        {NAV.map((item) => {
           const active = isActive(item.href);
           return (
             <a
@@ -48,14 +38,13 @@ const nav = [
         })}
       </nav>
 
-      <!-- Right actions -->
       <DarkModeToggle />
     </div>
 
     <!-- Mobile: scrollable pills -->
     <nav class="md:hidden -mt-1 mb-2">
       <div class="no-scrollbar flex gap-2 overflow-x-auto py-1">
-        {nav.map((item) => {
+        {NAV.map((item) => {
           const active = isActive(item.href);
           return (
             <a
