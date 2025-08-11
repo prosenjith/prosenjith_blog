@@ -5,39 +5,34 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  deployments: write
+  id-token: write  # not strictly required for this action, but safe for OIDC
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
-      - name: Install deps
-        run: npm ci || npm install
-
-      - name: Build
-        run: npm run build   # outputs to dist
+      - run: npm ci || npm install
+      - run: npm run build
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (for pages-action to read repo)
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Deploy to Cloudflare Pages
-        id: deploy
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${{ secrets.CLOUDFLARE_PAGES_PROJECT }}  # e.g. prosenjith-blog
+          projectName: ${{ secrets.CLOUDFLARE_PAGES_PROJECT }}
           directory: dist
           wranglerVersion: 3
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
