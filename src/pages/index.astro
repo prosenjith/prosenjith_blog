@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import { SITE } from "../site";
 import { getCollection } from "astro:content";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -10,31 +9,40 @@ const posts = (await getCollection("posts"))
   .filter(p => !p.data.draft)
   .sort((a,b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 ---
+
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{SITE.title}</title>
-    <meta name="description" content={SITE.description} />
-    <meta property="og:title" content={SITE.title} />
-    <meta property="og:description" content={SITE.description} />
-    <script is:inline>!function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches)}catch(_){}}();</script>
+    <title>Shuvo’s Notes</title>
+    <meta name="description" content="Software Engineering • Android • Programming • Physics" />
   </head>
   <body class="max-w-3xl mx-auto px-4">
     <Header />
-    <main class="pt-8 md:pt-10 lg:pt-12">
-      <section class="space-y-8">
-        {posts.map(({ slug, data }) => (
-          <PostCard
-            href={`/posts/${slug}/`}
-            title={data.title}
-            description={data.description}
-            date={data.pubDate.toDateString()}
-            tags={data.tags}
-          />
-        ))}
-      </section>
-    </main>
+
+    <!-- Intro Section -->
+    <section class="prose prose-neutral dark:prose-invert max-w-none mt-10 mb-12">
+      <h1 class="text-3xl font-bold">Hi, I’m Prosenjith 👋</h1>
+      <p>
+        I’m a Software Engineer passionate about building brilliant apps, teaching machines to think, and exploring the secrets of the universe.
+        This blog is my space to share ideas, projects, and thoughts on topics that inspire me — from
+        building mobile apps to exploring the universe.
+      </p>
+    </section>
+
+    <!-- Blog posts -->
+    <section class="space-y-8">
+      {posts.map(({ slug, data }) => (
+        <PostCard
+          href={`/posts/${slug}/`}
+          title={data.title}
+          description={data.description}
+          date={data.pubDate.toDateString()}
+          tags={data.tags}
+        />
+      ))}
+    </section>
+
     <Footer />
   </body>
 </html>
