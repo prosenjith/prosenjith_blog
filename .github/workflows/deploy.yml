@@ -8,25 +8,27 @@ on:
 permissions:
   contents: read
   deployments: write
-  id-token: write  # not strictly required for this action, but safe for OIDC
+  id-token: write
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - run: npm ci || npm install
-      - run: npm run build
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+      - name: Install deps
+        run: npm ci || npm install
+
+      - name: Build (Astro -> dist)
+        run: npm run build
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
@@ -34,5 +36,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ secrets.CLOUDFLARE_PAGES_PROJECT }}
           directory: dist
-          wranglerVersion: 3
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # wranglerVersion: 4   # optional; v1 action supports v3. You can try 4.
