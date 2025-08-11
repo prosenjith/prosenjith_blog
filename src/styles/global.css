@@ -1,12 +1,111 @@
+/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =========================
+   Theme tokens
+   ========================= */
 html { color-scheme: light dark; }
 :root { --bg: #ffffff; --fg: #111111; }
 .dark { --bg: #0b0b0b; --fg: #f5f5f5; }
 
 body { background: var(--bg); color: var(--fg); }
 
-.prose img { border-radius: 0.75rem; }
-.prose code { font-weight: 500; }
+/* =========================
+   Typography (prose areas)
+   ========================= */
+.prose { line-height: 1.65; }
+.prose h1 { letter-spacing: -0.01em; }             /* spacing polish for big titles */
+.prose p + p { margin-top: .9em; }                 /* nicer paragraph rhythm */
+.prose img { border-radius: 0.75rem; }             /* soft corners on images */
+.prose code { font-weight: 500; }                  /* slightly stronger inline code */
+
+/* Elegant, theme-aware horizontal rules (Tailwind Typography compatible) */
+.prose :where(hr):not(:where(.not-prose *)) {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  height: 1px;
+  border: 0;
+  background: linear-gradient(to right, transparent, rgba(0,0,0,.18), transparent);
+}
+.dark .prose :where(hr):not(:where(.not-prose *)) {
+  background: linear-gradient(to right, transparent, rgba(255,255,255,.22), transparent);
+}
+/* Ensure the element right after <hr> breathes */
+.prose :where(hr):not(:where(.not-prose *)) + :where(*) {
+  margin-top: 2rem !important;
+}
+
+/* =========================
+   Elegant nav pills
+   ========================= */
+.nav-pill {
+  padding: 0.45rem 0.75rem;
+  border-radius: 9999px;
+  position: relative;
+  line-height: 1;
+  transition:
+    background-color .25s ease,
+    color .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease,
+    transform .06s ease;
+}
+
+/* Idle (ghost) */
+.nav-pill--idle {
+  color: rgba(17,17,17,.78);
+  background: rgba(0,0,0,.035);
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+}
+.dark .nav-pill--idle {
+  color: rgba(245,245,245,.8);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset;
+}
+.nav-pill--idle:hover { background: rgba(0,0,0,.07); }
+.dark .nav-pill--idle:hover { background: rgba(255,255,255,.10); }
+
+/* Active (tactile) */
+.nav-pill--active {
+  color: #0b0b0b;
+  background: linear-gradient(180deg, #ffffff, #f2f2f2);
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 1px 0 rgba(0,0,0,.03), 0 6px 16px rgba(0,0,0,.06) inset;
+}
+.dark .nav-pill--active {
+  color: #0b0b0b;
+  background: #ffffff;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 1px 0 rgba(255,255,255,.06) inset;
+}
+
+/* Micro-press feedback + accessible focus ring */
+.nav-pill:active { transform: translateY(1px); }
+.nav-pill:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow:
+    0 0 0 2px rgba(99,102,241,.55),
+    0 1px 0 rgba(0,0,0,.03) inset;
+  border-color: transparent;
+}
+
+/* Hide scrollbar for mobile pill row */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Subtle depth for sticky header */
+header.sticky { box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+.dark header.sticky { box-shadow: 0 1px 0 rgba(255,255,255,.06); }
+
+/* Brand gradient text (used for “Prosenjith’s Notes”) */
+.brand-text {
+  background: linear-gradient(90deg, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: opacity .25s ease;
+}
+.brand-text:hover { opacity: 0.85; }
