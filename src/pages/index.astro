@@ -21,14 +21,26 @@ const posts = (await getCollection("posts"))
     <Header />
 
     <!-- Intro Section -->
-    <section class="prose prose-neutral dark:prose-invert max-w-none mt-10 mb-12">
-      <h1 class="text-3xl font-bold">Hi, I’m Prosenjith 👋</h1>
-      <p>
-        I’m a Software Engineer passionate about building brilliant apps, teaching machines to think, and exploring the secrets of the universe.
-        This blog is my space to share ideas, projects, and thoughts on topics that inspire me — from
-        building mobile apps to exploring the universe.
-      </p>
-    </section>
+<section class="relative mt-10 mb-12">
+  <!-- Big image in the left gutter (hidden on small screens) -->
+  <img
+    src="images/my-photo.jpg"
+    alt="Prosenjith Roy"
+    class="hidden md:block absolute top-0 left-[-350px] w-72 h-96 object-cover rounded-xl shadow-2xl ring-1 ring-black/10"
+  />
+
+  <!-- Your intro text stays in the normal flow -->
+  <div class="prose prose-neutral dark:prose-invert max-w-none">
+    <h1 class="text-3xl font-bold">Hi, I’m Prosenjith 👋</h1>
+    <p>
+      I’m a Software Engineer passionate about building brilliant apps, teaching machines to think, and exploring the secrets of the universe.
+      This blog is my space to share ideas, projects, and thoughts on topics that inspire me — from
+      building mobile apps to exploring the universe.
+    </p>
+  </div>
+</section>
+
+
 
     <!-- Blog posts -->
     <section class="space-y-8">
