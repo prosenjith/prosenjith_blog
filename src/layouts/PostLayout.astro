@@ -1,41 +1,63 @@
 ---
-import "../styles/global.css";
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
-import Giscus from "../components/Giscus.astro";
+import BaseLayout from "./BaseLayout.astro";
 
-interface Frontmatter {
-  title: string;
-  description: string;
-  pubDate: Date;
-  updatedDate?: Date;
-  tags: string[];
+// Accept both ways MDX can pass props: direct or nested under `frontmatter`
+type MaybeDate = string | Date | undefined;
+
+const props = Astro.props as Record<string, unknown>;
+
+// Prefer top-level keys, fall back to `frontmatter` if present
+const fm = (props.frontmatter ?? {}) as Record<string, unknown>;
+
+const title       = (props.title       ?? fm.title)       as string;
+const description = (props.description ?? fm.description) as string;
+const tags        = (props.tags        ?? fm.tags        ?? []) as string[];
+
+const rawPub: MaybeDate = (props.pubDate     ?? fm.pubDate)     as MaybeDate;
+const rawUpd: MaybeDate = (props.updatedDate ?? fm.updatedDate) as MaybeDate;
+
+// --- safe date helpers ---
+function toValidDate(v: unknown): Date | null {
+  if (!v) return null;
+  const d = v instanceof Date ? v : new Date(v as any);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
-const { title, description, pubDate, updatedDate, tags } = Astro.props as Frontmatter;
+
+const pub = toValidDate(rawPub);
+const upd = toValidDate(rawUpd);
+
+const publishedISO = pub?.toISOString();
+const updatedISO   = upd?.toISOString();
+
+const human = (d: Date | null) =>
+  d
+    ? d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      })
+    : "";
+
+// OG image slug
+const slug = Astro.url.pathname.split("/").filter(Boolean).pop() ?? "";
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} | Shuvo’s Notes</title>
 
-    <!-- Basic Meta -->
+<BaseLayout title={`${title} | Shuvo’s Notes`}>
+  <Fragment slot="head">
     <meta name="description" content={description} />
-    <meta name="keywords" content={tags?.join(", ")} />
+    {tags.length ? <meta name="keywords" content={tags.join(", ")} /> : null}
 
-    <!-- Open Graph -->
+    <!-- OG / Twitter -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={`/og/${Astro.url.pathname.split('/').filter(Boolean).pop()}.png`} />
-
-    <!-- Twitter -->
+    <meta property="og:image" content={`/og/${slug}.png`} />
     <meta property="twitter:card" content="summary_large_image" />
 
-    <!-- Canonical -->
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
 
-    <!-- KaTeX Styles -->
+    <!-- KaTeX -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
@@ -43,55 +65,48 @@ const { title, description, pubDate, updatedDate, tags } = Astro.props as Frontm
       crossorigin="anonymous"
     />
 
-    <!-- Theme Script -->
-    <script is:inline>
-      !function(){
-        try {
-          var t = localStorage.getItem('theme');
-          if (t) {
-            document.documentElement.classList.toggle('dark', t === 'dark')
-          } else {
-            document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches)
-          }
-        } catch(e) {}
-      }();
-    </script>
-
-    <!-- JSON-LD Article Schema -->
+    <!-- JSON-LD (only include dates if valid) -->
     <script type="application/ld+json" is:inline>
       {JSON.stringify({
         "@context": "https://schema.org",
         "@type": "BlogPosting",
-        "headline": title,
-        "description": description,
-        "datePublished": pubDate,
-        "dateModified": updatedDate ?? pubDate,
-        "mainEntityOfPage": new URL(Astro.url.pathname, Astro.site),
-        "articleSection": tags
+        headline: title,
+        description,
+        ...(publishedISO ? { datePublished: publishedISO } : {}),
+        ...(updatedISO ? { dateModified: updatedISO } : publishedISO ? { dateModified: publishedISO } : {}),
+        mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).toString(),
+        articleSection: tags
       })}
     </script>
-  </head>
-  <body class="max-w-3xl mx-auto px-4">
-    <Header />
-    <main class="prose prose-neutral dark:prose-invert max-w-none pt-8 md:pt-10 lg:pt-12" role="main">
-      <a href="/" class="inline-block mb-3 text-sm hover:underline">← Home</a>
+  </Fragment>
 
-      <h1>{title}</h1>
-      <p class="!mt-0 text-sm opacity-70">
-        {new Date(pubDate).toDateString()}
-        {updatedDate && ` • Updated ${new Date(updatedDate).toDateString()}`}
-      </p>
+  <article class="prose prose-neutral dark:prose-invert max-w-none pt-8 md:pt-10 lg:pt-12">
+    <a href="/" class="inline-block mb-3 text-sm hover:underline">← Home</a>
 
-      <div class="mt-2 flex flex-wrap gap-2">
-        {tags?.map(t => (
-          <a href={`/tags/${t}`} class="text-xs px-2 py-1 border rounded">{t}</a>
-        ))}
-      </div>
+    <h1>{title}</h1>
 
-      <slot />
+    <p class="!mt-0 text-sm opacity-70">
+      {pub ? <time datetime={publishedISO}>{human(pub)}</time> : null}
+      {upd ? (
+        <>
+          {" • Updated "}
+          <time datetime={updatedISO}>{human(upd)}</time>
+        </>
+      ) : null}
+    </p>
 
-      <Giscus />
-    </main>
-    <Footer />
-  </body>
-</html>
+    {tags.length > 0 && (
+  <div class="mt-2 text-xs opacity-70 flex items-center gap-2 flex-wrap">
+    {tags.map((t) => (
+      <a
+        href={`/tags/${t}`}
+        class="px-2 py-0.5 border rounded no-underline hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        {t}
+      </a>
+    ))}
+  </div>
+)}
+    <slot />
+  </article>
+</BaseLayout>
