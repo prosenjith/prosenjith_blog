@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getCollection } from "astro:content";
+import { CATEGORIES, postInCategory, SITE } from "../../site";
+
+type CatKey = keyof typeof CATEGORIES;
+
+export async function getStaticPaths() {
+  const keys = Object.keys(CATEGORIES) as CatKey[];
+  return keys.map((key) => ({ params: { category: key } }));
+}
+
+const params = Astro.params as { category: CatKey };
+const catKey = params.category;
+
+if (!(catKey in CATEGORIES)) {
+  Astro.response.status = 404;
+}
+
+const all = await getCollection("posts");
+const posts = all
+  .filter((p) => postInCategory(p.data.tags, catKey))
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+
+const fmt = (d: Date | string) =>
+  new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
+
+const cat = CATEGORIES[catKey];
+const pageTitle = `${cat.label} · ${SITE.title}`;
+---
+
+<BaseLayout title={pageTitle}>
+  <section class="pt-8 md:pt-10 lg:pt-12">
+    <header class="mb-6 not-prose">
+      <h1 class="text-3xl font-bold tracking-tight">{cat.label}</h1>
+      <p class="mt-1 text-sm opacity-80">
+        Posts tagged with: {cat.tags.map((t) => `#${t}`).join(" · ")}
+      </p>
+    </header>
+
+    <div>
+      {posts.length === 0 ? (
+        <p class="text-sm opacity-70">No posts yet in this category.</p>
+      ) : (
+        <div class="mt-6 space-y-6 not-prose">
+          {posts.map((p) => (
+            <PostCard
+              href={`/posts/${p.slug}/`}
+              title={p.data.title}
+              description={p.data.description}
+              date={fmt(p.data.pubDate)}
+              tags={p.data.tags}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
