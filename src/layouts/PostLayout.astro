@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import Cusdis from "../components/Cusdis.astro"; // ← added
 
 // Accept both ways MDX can pass props: direct or nested under `frontmatter`
 type MaybeDate = string | Date | undefined;
@@ -96,17 +97,55 @@ const slug = Astro.url.pathname.split("/").filter(Boolean).pop() ?? "";
     </p>
 
     {tags.length > 0 && (
-  <div class="mt-2 text-xs opacity-70 flex items-center gap-2 flex-wrap">
-    {tags.map((t) => (
-      <a
-        href={`/tags/${t}`}
-        class="px-2 py-0.5 border rounded no-underline hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      >
-        {t}
-      </a>
-    ))}
-  </div>
-)}
+      <div class="mt-2 text-xs opacity-70 flex items-center gap-2 flex-wrap">
+        {tags.map((t) => (
+          <a
+            href={`/tags/${t}`}
+            class="px-2 py-0.5 border rounded no-underline hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            {t}
+          </a>
+        ))}
+      </div>
+    )}
+
     <slot />
+
+    <!-- Divider before comments -->
+    <hr class="my-10 border-black/10 dark:border-white/10" />
+
+    <!-- Comments: same width as post -->
+    <section id="comments" class="mt-8">
+      <!-- Wrapper fills remaining viewport so no large blank area below -->
+      <div id="comments-fill">
+        <Cusdis title={title} />
+      </div>
+    </section>
+
+    <!-- Make the comments block fill remaining viewport height -->
+    <script is:inline>
+      (function () {
+        const commentsFill = document.getElementById('comments-fill');
+        if (!commentsFill) return;
+
+        function fillRest() {
+          // distance from top of viewport to top of the comments wrapper
+          const rect = commentsFill.getBoundingClientRect();
+          const topFromViewport = rect.top;
+          const padding = 24; // little breathing room at bottom
+          const min = Math.max(420, Math.floor(window.innerHeight - topFromViewport - padding));
+          commentsFill.style.minHeight = min + 'px';
+        }
+
+        // initial + on resize/orientation
+        fillRest();
+        window.addEventListener('resize', fillRest);
+        window.addEventListener('orientationchange', fillRest);
+
+        // re-run after fonts/layout shifts
+        setTimeout(fillRest, 50);
+        setTimeout(fillRest, 250);
+      })();
+    </script>
   </article>
 </BaseLayout>

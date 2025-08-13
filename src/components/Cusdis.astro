@@ -1,0 +1,98 @@
+---
+/** src/components/Cusdis.astro */
+interface Props { title?: string }
+const { title = "" } = Astro.props as Props;   // server-safe
+const pageId = Astro.url.pathname;             // server-safe
+const pageUrl = Astro.url.href;                // server-safe
+---
+
+<div id="cusdis-wrap">
+  <div
+    id="cusdis_thread"
+    data-host="https://cusdis.com"
+    data-app-id="a587f43f-7612-4163-a769-db1d073b78cb"   <!-- ✅ your App ID -->
+    data-page-id={pageId}
+    data-page-url={pageUrl}
+    data-page-title={title}
+    data-lang="en"
+    data-theme="light"                                   <!-- will sync below -->
+  ></div>
+</div>
+
+<style>
+  /* Wrapper fills remaining space nicely, with a sensible fallback */
+  #cusdis-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 520px;               /* fallback if JS is disabled */
+  }
+  /* When the iframe appears, let it grow to fill the wrapper */
+  #cusdis-wrap iframe {
+    flex: 1 0 auto;
+    width: 100%;
+  }
+</style>
+
+<!-- Load Cusdis widget -->
+<script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+
+<!-- Client-only helpers: theme sync + dynamic min-height -->
+<script is:inline>
+  (function () {
+    // --- Dark mode sync (matches your html.dark toggle) ---
+    function preferDark() {
+      return document.documentElement.classList.contains('dark');
+    }
+    function setCusdisTheme(theme) {
+      const el = document.getElementById('cusdis_thread');
+      if (el) el.setAttribute('data-theme', theme);
+
+      const iframe = document.querySelector('iframe[src*="cusdis.com"]');
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage(
+          { from: 'cusdis', event: 'setTheme', data: theme },
+          '*'
+        );
+      }
+    }
+    // Initial theme
+    const initialTheme = preferDark() ? 'dark' : 'light';
+    setCusdisTheme(initialTheme);
+    // React to <html class="dark"> changes
+    const themeObs = new MutationObserver(() => {
+      setCusdisTheme(preferDark() ? 'dark' : 'light');
+    });
+    themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    // Ensure theme after widget signals ready
+    window.addEventListener('message', (e) => {
+      if (e?.data?.from === 'cusdis' && e?.data?.event === 'onReady') {
+        setCusdisTheme(preferDark() ? 'dark' : 'light');
+      }
+    });
+
+    // --- Fill remaining viewport (nice tall comment area) ---
+    function applyMinHeight() {
+      const wrap = document.getElementById('cusdis-wrap');
+      if (!wrap) return;
+      // Distance from top of viewport to top of wrapper
+      const top = wrap.getBoundingClientRect().top + window.scrollY - window.scrollY;
+      // Leave a small bottom padding
+      const bottomPad = 24;
+      const min = Math.max(420, Math.floor(window.innerHeight - top - bottomPad));
+      wrap.style.minHeight = min + 'px';
+    }
+    // Run on load and resize/orientation changes
+    applyMinHeight();
+    window.addEventListener('resize', applyMinHeight);
+    window.addEventListener('orientationchange', applyMinHeight);
+
+    // When the iframe is inserted, ensure it can flex to fill
+    const wrapObs = new MutationObserver(() => {
+      const iframe = document.querySelector('#cusdis-wrap iframe');
+      if (iframe) {
+        iframe.style.height = '100%';   // let flexbox control height
+      }
+    });
+    wrapObs.observe(document.getElementById('cusdis-wrap'), { childList: true, subtree: true });
+  })();
+</script>
