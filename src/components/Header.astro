@@ -13,7 +13,7 @@ const isActive = (href: string) =>
 >
   <div class="mx-auto max-w-3xl px-4">
     <div class="h-14 flex items-center justify-between gap-3">
-      <!-- Brand -->
+      <!-- Brand (unchanged) -->
       <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-[1.05rem] hover:opacity-90">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-pink-500 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M12 20h9" />
@@ -30,7 +30,11 @@ const isActive = (href: string) =>
             <a
               href={item.href}
               aria-current={active ? "page" : undefined}
-              class={`nav-pill ${active ? "nav-pill--active" : "nav-pill--idle"}`}
+              class={`nav-pill ${
+                active
+                  ? "nav-pill--active bg-black text-white dark:bg-white dark:text-black"
+                  : "nav-pill--idle"
+              }`}
             >
               {item.label}
             </a>
@@ -50,7 +54,11 @@ const isActive = (href: string) =>
             <a
               href={item.href}
               aria-current={active ? "page" : undefined}
-              class={`nav-pill text-sm ${active ? "nav-pill--active" : "nav-pill--idle"}`}
+              class={`nav-pill text-sm ${
+                active
+                  ? "nav-pill--active bg-black text-white dark:bg-white dark:text-black"
+                  : "nav-pill--idle"
+              }`}
             >
               {item.label}
             </a>
