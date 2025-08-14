@@ -2,40 +2,57 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
 import { getCollection } from "astro:content";
-import { SITE } from "../../site";
+import { CATEGORIES, SITE } from "../../site";
 
-// Build a page for every tag (use the raw tag; Astro will handle encoding)
+// Helper to make tags URL‑friendly and comparable
+const slugify = (s: string) =>
+  String(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+// Build a page for every tag used in posts or defined in CATEGORIES
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  const tags = Array.from(new Set(posts.flatMap((p) => p.data.tags ?? [])));
+  const postTags = posts.flatMap((p) => p.data.tags ?? []);
+  const catTags = Object.values(CATEGORIES).flatMap((c) => c.tags);
+  const tags = Array.from(new Set([...postTags, ...catTags]));
   return tags.map((tag) => ({ params: { tag } }));
 }
 
 const rawParam = String(Astro.params.tag ?? "");
-// decode in case the URL contains %20 etc.
 const currentTag = decodeURIComponent(rawParam);
 
 const all = await getCollection("posts");
 const posts = all
   .filter(
     (p) =>
-      !p.data.draft && (p.data.tags ?? []).some((t) => t === currentTag)
+      !p.data.draft &&
+      (p.data.tags ?? []).some((t) => slugify(t) === slugify(currentTag))
   )
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 
 const fmt = (d?: Date) =>
-  d ? d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
+  d
+    ? new Date(d).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
 ---
 
 <BaseLayout title={`#${currentTag} — ${SITE.title}`}>
   <section class="mt-8 md:mt-12">
     <h1 class="text-3xl font-bold tracking-tight m-0">#{currentTag}</h1>
-    <p class="mt-2 opacity-70">{posts.length} {posts.length === 1 ? "post" : "posts"}</p>
+    <p class="mt-2 opacity-70">
+      {posts.length} {posts.length === 1 ? "post" : "posts"}
+    </p>
   </section>
 
   <section class="mt-8 space-y-8">
     {posts.length === 0 ? (
-      <p class="opacity-70">No posts yet.</p>
+      <p class="opacity-70">No posts yet with this tag.</p>
     ) : (
       posts.map(({ slug, data }) => (
         <PostCard
