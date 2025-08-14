@@ -1,33 +1,51 @@
 ---
-import "../../styles/global.css";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
 import { getCollection } from "astro:content";
+import { SITE } from "../../site";
 
-// Pre-generate a page for every tag found in your posts
+// Build a page for every tag (use the raw tag; Astro will handle encoding)
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  const tags = [...new Set(posts.flatMap(p => p.data.tags ?? []))];
-  return tags.map(tag => ({ params: { tag } }));
+  const tags = Array.from(new Set(posts.flatMap((p) => p.data.tags ?? [])));
+  return tags.map((tag) => ({ params: { tag } }));
 }
 
-const { tag } = Astro.params;
-const posts = (await getCollection("posts"))
-  .filter(p => !p.data.draft && (p.data.tags ?? []).includes(tag))
+const rawParam = String(Astro.params.tag ?? "");
+// decode in case the URL contains %20 etc.
+const currentTag = decodeURIComponent(rawParam);
+
+const all = await getCollection("posts");
+const posts = all
+  .filter(
+    (p) =>
+      !p.data.draft && (p.data.tags ?? []).some((t) => t === currentTag)
+  )
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const fmt = (d?: Date) =>
+  d ? d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
 ---
 
-<html lang="en">
-  <body class="max-w-3xl mx-auto px-4 py-8">
-    <a href="/" class="inline-block text-sm hover:underline">← All posts</a>
-    <h1 class="text-3xl font-bold mt-4">Tag: {tag}</h1>
-    <ul class="mt-6 space-y-6">
-      {posts.map(({ slug, data }) => (
-        <li>
-          <a href={`/posts/${slug}/`} class="text-xl font-semibold hover:underline">
-            {data.title}
-          </a>
-          <p class="opacity-80">{data.description}</p>
-        </li>
-      ))}
-    </ul>
-  </body>
-</html>
+<BaseLayout title={`#${currentTag} — ${SITE.title}`}>
+  <section class="mt-8 md:mt-12">
+    <h1 class="text-3xl font-bold tracking-tight m-0">#{currentTag}</h1>
+    <p class="mt-2 opacity-70">{posts.length} {posts.length === 1 ? "post" : "posts"}</p>
+  </section>
+
+  <section class="mt-8 space-y-8">
+    {posts.length === 0 ? (
+      <p class="opacity-70">No posts yet.</p>
+    ) : (
+      posts.map(({ slug, data }) => (
+        <PostCard
+          href={`/posts/${slug}/`}
+          title={data.title}
+          description={data.description}
+          date={fmt(data.pubDate)}
+          tags={data.tags}
+        />
+      ))
+    )}
+  </section>
+</BaseLayout>
